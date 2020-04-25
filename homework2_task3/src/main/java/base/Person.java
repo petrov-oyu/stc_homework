@@ -1,5 +1,10 @@
-import java.util.Comparator;
+package base;
 
+/**
+ * Container for base information about person
+ *
+ * @author Petrov_OlegYu
+ */
 public class Person implements Comparable<Person>{
 	private Integer age;
 	private Sex sex;
@@ -33,35 +38,38 @@ public class Person implements Comparable<Person>{
 		}
 	}
 
+
 	@Override
 	public int compareTo(Person o) {
 		//первые идут мужчины
-		if (this.sex.isMan() && o.sex.isWoman()) {
-			return 1;
+		int resOfCompare = this.sex.compareTo(o.sex);
+		if (resOfCompare != 0) {
+			return resOfCompare;
 		}
-		if (this.sex.isWoman() && o.sex.isMan()) {
-			return -1;
-		}
+
 		//выше в списке тот, кто более старший
-		if (this.age > o.age) {
-			return 1;
-		}
-		if (this.age < o.age) {
-			return -1;
+		resOfCompare = this.age.compareTo(o.age);
+		if (resOfCompare != 0) {
+			return resOfCompare;
 		}
 
 		//имена сортируются по алфавиту
-
-		return 0;
+		return this.name.compareTo(o.name);
 	}
 
-	public class Sex {
+	/**
+	 * Sex of person
+	 */
+	public class Sex implements Comparable<Sex>{
 		public static final String MAN = "MAN";
 		public static final String WOMAN = "WOMAN";
 
 		private String sex;
 
 		public Sex(String sex) {
+			if(sex != MAN || sex !=WOMAN) {
+				throw new RuntimeException("unexpected sex of person");
+			}
 			this.sex = sex;
 		}
 
@@ -71,6 +79,18 @@ public class Person implements Comparable<Person>{
 
 		public boolean isWoman() {
 			return this.sex.equals(WOMAN);
+		}
+
+		@Override
+		public int compareTo(Sex o) {
+			//первые идут мужчины
+			if (this.isMan() && o.isWoman()) {
+				return 1;
+			}
+			if (this.isWoman() && o.isMan()) {
+				return -1;
+			}
+			return 0;
 		}
 	}
 }
