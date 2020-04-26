@@ -93,7 +93,7 @@ public class Person implements Comparable<Person>{
 		}
 
 		//имена сортируются по алфавиту
-		return this.name.compareTo(o.name);
+		return -this.name.compareTo(o.name);
 	}
 
 	@Override
@@ -115,7 +115,7 @@ public class Person implements Comparable<Person>{
 		private String sex;
 
 		public Sex(String sex) {
-			if(sex != MAN || sex !=WOMAN) {
+			if(!(sex.equals(MAN) || sex.equals(WOMAN))) {
 				throw new RuntimeException("unexpected sex of person");
 			}
 			this.sex = sex;
@@ -139,6 +139,13 @@ public class Person implements Comparable<Person>{
 				return -1;
 			}
 			return 0;
+		}
+
+		@Override
+		public String toString() {
+			return "Sex{" +
+					"sex='" + sex + '\'' +
+					'}';
 		}
 	}
 }
