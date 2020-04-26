@@ -5,6 +5,8 @@ import sort.SamePersonException;
 import sort.Sorter;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Start point of program
@@ -20,7 +22,7 @@ public class Main {
 			persons[i] = Person.createRandomPerson();
 		}
 
-		//should be builder:
+		//should be as builder:
 //		Person person = Person.createRandomPerson();
 //		person.setSex(person.new Sex(Sex.MAN));
 //		person.setAge(10);
@@ -45,11 +47,21 @@ public class Main {
 //		person.setName("Ivan");
 //		persons[arraySize + 3] = person;
 
+		//Если имена людей и возраст совпадают, выбрасывать в программе пользовательское исключение.
+		Set<Person> setOfPersons = new HashSet<>();
+		setOfPersons.addAll(Arrays.asList(persons));
+		if (setOfPersons.size() != persons.length) {
+			throw new SamePersonException("You have duplicate persons. Persons age and name should not equals");
+		}
+
 		System.out.println("Before sorting: " + Arrays.toString(persons));
 
+		//Программа должна вывести на экран отсортированный список и время работы каждого алгоритма сортировки.
 		Person[] insertionPersons = sortPersons(persons, new InsertionSorter());
 		Person[] quickPersons = sortPersons(persons, new QuickSorter());
 
+
+		//tests. it's might be in Test class
 		int assertionCount = 10;
 		if (assertionCount > arraySize) {
 			assertionCount = arraySize;

@@ -19,7 +19,6 @@ public class InsertionSorter implements Sorter {
 			Person current = array[i];
 			int j = i - 1;
 
-			Sorter.isEquals(current, array[j]);
 			while (j >= 0 && (current.compareTo(array[j]) > 0)) {
 				array[j + 1] = array[j];
 				j--;
