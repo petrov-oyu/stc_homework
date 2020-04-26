@@ -1,6 +1,6 @@
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 /**
@@ -73,18 +73,18 @@ public class Main {
 			if (this == o) return true;
 			if (!(o instanceof MathBox)) return false;
 			MathBox mathBox = (MathBox) o;
-			return Objects.equals(numbers, mathBox.numbers);
+			return Objects.equals(doubleStreamOfNumbers, mathBox.doubleStreamOfNumbers);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(numbers);
+			return Objects.hash(doubleStreamOfNumbers);
 		}
 
 		@Override
 		public String toString() {
 			return "MathBox{" +
-					"numbers=" + numbers +
+					"numbers=" + Arrays.toString(doubleStreamOfNumbers.toArray()) +
 					'}';
 		}
 	}
