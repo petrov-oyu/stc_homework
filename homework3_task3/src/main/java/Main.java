@@ -14,14 +14,30 @@ import java.util.HashSet;
 public class Main {
 	public static void main(String[] args) {
 		ObjectBox mathBox = new MathBox(new HashSet<Number>());
-		mathBox.addObject("first string");
-		mathBox.addObject("second string");
-		mathBox.addObject("third string");
-		mathBox.addObject("fourth string");
-		mathBox.addObject("fifth string");
+//		mathBox.addObject("first string");
 
-		mathBox.deleteObject("second string");
+		mathBox.addObject(1);
+		mathBox.addObject(3.5);
+		mathBox.addObject(1000.0);
+		mathBox.addObject(100.0);
 
+		System.out.println(((MathBox) mathBox).summator());
+		mathBox.dump();
+
+		mathBox.deleteObject(100.0);
+		System.out.println(((MathBox) mathBox).summator());
+		mathBox.dump();
+
+		((MathBox) mathBox).removeNumber(1000);
+		System.out.println(((MathBox) mathBox).summator());
+		mathBox.dump();
+
+		((MathBox) mathBox).removeNumber(100);
+		System.out.println(((MathBox) mathBox).summator());
+		mathBox.dump();
+
+		((MathBox) mathBox).removeNumber(3);
+		System.out.println(((MathBox) mathBox).summator());
 		mathBox.dump();
 
 		assert mathBox.getClass().getSuperclass() == ObjectBox.class;

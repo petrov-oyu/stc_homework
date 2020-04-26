@@ -61,12 +61,15 @@ public class MathBox extends ObjectBox<Number> {
 				.collect(Collectors.toSet());
 	}
 
-//	@Override
-//	public void addObject(Number obj) {
-//		!!!ClassCastException
-//		System.err.println(obj.getClass());
-//		super.addObject(obj);
-//	}
+	@Override
+	public void addObject(Number obj) {
+		super.addObject(obj);
+	}
+
+	@Override
+	public void deleteObject(Number obj) {
+		super.deleteObject(obj);
+	}
 
 	@Override
 	public String toString() {
