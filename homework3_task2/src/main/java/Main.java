@@ -8,6 +8,20 @@ import java.util.Collection;
  *  @author Petrov_OlegYu
  */
 public class Main {
+	public static void main(String[] args) {
+		ObjectBox objectBox = new ObjectBox();
+		objectBox.addObject("first string");
+		objectBox.addObject("second string");
+		objectBox.addObject("third string");
+		objectBox.addObject("fourth string");
+		objectBox.addObject("fifth string");
+
+		objectBox.deleteObject("second string");
+
+		objectBox.dump();
+	}
+
+
 }
 
 /**
