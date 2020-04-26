@@ -1,5 +1,8 @@
 package base;
 
+import java.util.Objects;
+import java.util.Random;
+
 /**
  * Container for base information about person
  *
@@ -30,6 +33,20 @@ public class Person implements Comparable<Person>{
 		return age;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Person)) return false;
+		Person person = (Person) o;
+		return getAge().equals(person.getAge()) &&
+				getName().equals(person.getName());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getAge(), getName());
+	}
+
 	public void setAge(Integer age) {
 		if (age > 0 || age < 100) {
 			this.age = age;
@@ -37,6 +54,28 @@ public class Person implements Comparable<Person>{
 			System.err.println("unacceptable age" + age);
 		}
 	}
+
+	/**
+	 * Create person with random information
+	 */
+	public static Person createRandomPerson() {
+		Person person = new Person();
+
+		Random random = new Random();
+		person.setAge(random.nextInt(100));
+		person.setName("DefaultName_" + random.nextInt(65535));
+
+
+		Sex sex = random.nextInt(2) == 1 ?
+				person.new Sex(Sex.MAN) :
+				person.new Sex(Sex.WOMAN);
+
+		person.setSex(sex);
+
+		return person;
+	}
+
+
 
 
 	@Override
@@ -55,6 +94,15 @@ public class Person implements Comparable<Person>{
 
 		//имена сортируются по алфавиту
 		return this.name.compareTo(o.name);
+	}
+
+	@Override
+	public String toString() {
+		return "Person{" +
+				"age=" + age +
+				", sex=" + sex +
+				", name='" + name + '\'' +
+				'}';
 	}
 
 	/**
