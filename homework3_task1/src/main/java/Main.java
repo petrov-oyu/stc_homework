@@ -1,6 +1,7 @@
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 /**
  * Start point for program
@@ -32,21 +33,20 @@ public class Main {
 	 * @author Petrov_OlegYu
 	 */
 	class MathBox {
-		private Set<Number> numbers;
+		private DoubleStream doubleStreamOfNumbers;
 		/**
 		 * Конструктор на вход получает массив Number. Элементы не могут повторяться.
 		 */
 		public MathBox(Set<Number> numbers) {
-			this.numbers = numbers;
+			doubleStreamOfNumbers = numbers.stream()
+					.mapToDouble(Number::doubleValue);
 		}
 
 		/**
 		 * @return возвращает сумму всех элементов коллекции
 		 */
 		public double summator() {
-			return numbers.stream()
-					      .mapToDouble(Number::doubleValue)
-					      .sum();
+			return doubleStreamOfNumbers.sum();
 		}
 
 		/**
@@ -56,22 +56,16 @@ public class Main {
 		 * Хранящиеся в объекте данные полностью заменяются результатами деления.
 		 */
 		public void splitter(Number divider) {
-			numbers = numbers.stream()
-					.mapToDouble(Number::doubleValue)
-					.map(value -> value / divider.doubleValue())
-					.boxed()
-					.collect(Collectors.toSet());
+			doubleStreamOfNumbers = doubleStreamOfNumbers
+					.map(value -> value / divider.doubleValue());
 		}
 
 		/**
 		 * получает на вход Integer и если такое значение есть в коллекции, удаляет его.
 		 */
 		public void removeNumber(Integer removedValue) {
-			numbers = numbers.stream()
-					.mapToDouble(Number::doubleValue)
-					.filter(currentValue -> !(currentValue == removedValue.doubleValue()))
-					.boxed()
-					.collect(Collectors.toSet());
+			doubleStreamOfNumbers = doubleStreamOfNumbers
+					.filter(currentValue -> !(currentValue == removedValue.doubleValue()));
 		}
 
 		@Override
