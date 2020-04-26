@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  *  Создать класс ObjectBox, который будет хранить коллекцию Object.
@@ -10,20 +11,20 @@ import java.util.Collection;
  *
  * @author Petrov_OlegYu
  */
-class ObjectBox {
-	private Collection<Object> objects = new ArrayList<Object>();
+class ObjectBox<T>{
+	protected Collection<T> objects = new ArrayList<T>();
 
 	/**
 	 * добавляет объект в коллекцию
 	 */
-	public void addObject(Object obj) {
+	public void addObject(T obj) {
 		objects.add(obj);
 	}
 
 	/**
 	 * Проверяет наличие объекта в коллекции и при наличии удаляет его
 	 */
-	public void deleteObject(Object obj) {
+	public void deleteObject(T obj) {
 		if (!objects.remove(obj)) {
 			System.out.println(obj + " not found");
 		};
@@ -36,5 +37,18 @@ class ObjectBox {
 		String objectsString = Arrays.toString(objects.toArray());
 		System.out.println(objectsString);
 		return objectsString;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof ObjectBox)) return false;
+		ObjectBox<?> objectBox = (ObjectBox<?>) o;
+		return Objects.equals(objects, objectBox.objects);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(objects);
 	}
 }

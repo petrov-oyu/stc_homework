@@ -1,7 +1,5 @@
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.DoubleStream;
+import java.util.stream.Collectors;
 /**
  * homework class, реализующий следующий функционал:
  *
@@ -21,21 +19,21 @@ import java.util.stream.DoubleStream;
  *
  * @author Petrov_OlegYu
  */
-public class MathBox {
-	private DoubleStream doubleStreamOfNumbers;
+public class MathBox extends ObjectBox<Number> {
 	/**
 	 * Конструктор на вход получает массив Number. Элементы не могут повторяться.
 	 */
 	public MathBox(Set<Number> numbers) {
-		doubleStreamOfNumbers = numbers.stream()
-				.mapToDouble(Number::doubleValue);
+		this.objects = numbers;
 	}
 
 	/**
 	 * @return возвращает сумму всех элементов коллекции
 	 */
 	public double summator() {
-		return doubleStreamOfNumbers.sum();
+		return objects.stream()
+				.mapToDouble(Number::doubleValue)
+				.sum();
 	}
 
 	/**
@@ -45,35 +43,35 @@ public class MathBox {
 	 * Хранящиеся в объекте данные полностью заменяются результатами деления.
 	 */
 	public void splitter(Number divider) {
-		doubleStreamOfNumbers = doubleStreamOfNumbers
-				.map(value -> value / divider.doubleValue());
+		objects = objects.stream()
+				.mapToDouble(Number::doubleValue)
+				.map(value -> value / divider.doubleValue())
+				.boxed()
+				.collect(Collectors.toSet());
 	}
 
 	/**
 	 * получает на вход Integer и если такое значение есть в коллекции, удаляет его.
 	 */
 	public void removeNumber(Integer removedValue) {
-		doubleStreamOfNumbers = doubleStreamOfNumbers
-				.filter(currentValue -> !(currentValue == removedValue.doubleValue()));
+		objects = objects.stream()
+				.mapToDouble(Number::doubleValue)
+				.filter(currentValue -> !(currentValue == removedValue.doubleValue()))
+				.boxed()
+				.collect(Collectors.toSet());
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof MathBox)) return false;
-		MathBox mathBox = (MathBox) o;
-		return Objects.equals(doubleStreamOfNumbers, mathBox.doubleStreamOfNumbers);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(doubleStreamOfNumbers);
-	}
+//	@Override
+//	public void addObject(Number obj) {
+//		!!!ClassCastException
+//		System.err.println(obj.getClass());
+//		super.addObject(obj);
+//	}
 
 	@Override
 	public String toString() {
 		return "MathBox{" +
-				"numbers=" + Arrays.toString(doubleStreamOfNumbers.toArray()) +
+				"numbers=" + objects +
 				'}';
 	}
 }
