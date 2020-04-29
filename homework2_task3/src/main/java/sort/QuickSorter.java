@@ -9,6 +9,7 @@ import base.Person;
 public class QuickSorter implements Sorter{
 	@Override
 	public void sort(Person[] array) {
+		// замер времени это не логика сортировки
 		long timeNow = System.currentTimeMillis();
 		quickSort(array, 0, array.length - 1);
 		System.out.println(this.getName() + " spent " + (System.currentTimeMillis() - timeNow) + " ms for sorting");

@@ -48,6 +48,8 @@ public class Person implements Comparable<Person>{
 	}
 
 	public void setAge(Integer age) {
+		// во-первых, что вы имеете против долгожителей? :)
+		// во-вторых условие всегда будет true
 		if (age > 0 || age < 100) {
 			this.age = age;
 		} else {
@@ -55,6 +57,8 @@ public class Person implements Comparable<Person>{
 		}
 	}
 
+	// статические методы - зло :)
+	// на самом деле нет ни одной хорошей причины, чтобы этот метод был в этом классе и раздувал его
 	/**
 	 * Create person with random information
 	 */
