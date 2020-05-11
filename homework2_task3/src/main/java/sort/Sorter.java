@@ -22,13 +22,4 @@ public interface Sorter {
 	default String getName() {
 		return this.getClass().getSimpleName();
 	};
-
-	// мёртвый код
-	static void isEquals(Person personFirst, Person personSecond) throws SamePersonException {
-		if(personFirst.equals(personSecond)) {
-			throw new SamePersonException("Persons age and name equals: "
-					+ personFirst
-					+ personSecond);
-		}
-	}
 }
