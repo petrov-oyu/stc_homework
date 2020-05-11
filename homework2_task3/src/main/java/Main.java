@@ -1,4 +1,5 @@
 import base.Person;
+import base.Person.Sex;
 import sort.InsertionSorter;
 import sort.QuickSorter;
 import sort.SamePersonException;
@@ -17,37 +18,36 @@ public class Main {
 	public static void main(String[] args) {
 		int arraySize = 3;
 		Person[] persons = new Person[arraySize];
-		// закомментированный код
 
-//		Person[] persons = new Person[arraySize + 4];
+		Person[] persons = new Person[arraySize + 4];
 		for (int i = 0; i < arraySize; i++) {
 			persons[i] = Person.createRandomPerson();
 		}
 
 		//should be as builder:
-//		Person person = Person.createRandomPerson();
-//		person.setSex(person.new Sex(Sex.MAN));
-//		person.setAge(10);
-//		person.setName("Antony");
-//		persons[arraySize] = person;
-//
-//		person = Person.createRandomPerson();
-//		person.setSex(person.new Sex(Sex.MAN));
-//		person.setAge(10);
-//		person.setName("Alex");
-//		persons[arraySize + 1] = person;
-//
-//		person = Person.createRandomPerson();
-//		person.setSex(person.new Sex(Sex.MAN));
-//		person.setAge(10);
-//		person.setName("Max");
-//		persons[arraySize + 2] = person;
-//
-//		person = Person.createRandomPerson();
-//		person.setSex(person.new Sex(Sex.MAN));
-//		person.setAge(10);
-//		person.setName("Ivan");
-//		persons[arraySize + 3] = person;
+		Person person = Person.createRandomPerson();
+		person.setSex(person.new Sex(Sex.MAN));
+		person.setAge(10);
+		person.setName("Antony");
+		persons[arraySize] = person;
+
+		person = Person.createRandomPerson();
+		person.setSex(person.new Sex(Sex.MAN));
+		person.setAge(10);
+		person.setName("Alex");
+		persons[arraySize + 1] = person;
+
+		person = Person.createRandomPerson();
+		person.setSex(person.new Sex(Sex.MAN));
+		person.setAge(10);
+		person.setName("Max");
+		persons[arraySize + 2] = person;
+
+		person = Person.createRandomPerson();
+		person.setSex(person.new Sex(Sex.MAN));
+		person.setAge(10);
+		person.setName("Ivan");
+		persons[arraySize + 3] = person;
 
 		//Если имена людей и возраст совпадают, выбрасывать в программе пользовательское исключение.
 		Set<Person> setOfPersons = new HashSet<>();
