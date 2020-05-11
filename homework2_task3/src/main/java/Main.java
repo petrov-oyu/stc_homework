@@ -7,6 +7,7 @@ import sort.Sorter;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -20,29 +21,29 @@ public class Main {
 
 		Person[] persons = new Person[arraySize + 4];
 		for (int i = 0; i < arraySize; i++) {
-			persons[i] = Person.createRandomPerson();
+			persons[i] = createRandomPerson();
 		}
 
 		//should be as builder:
-		Person person = Person.createRandomPerson();
+		Person person = createRandomPerson();
 		person.setSex(person.new Sex(Sex.MAN));
 		person.setAge(10);
 		person.setName("Antony");
 		persons[arraySize] = person;
 
-		person = Person.createRandomPerson();
+		person = createRandomPerson();
 		person.setSex(person.new Sex(Sex.MAN));
 		person.setAge(10);
 		person.setName("Alex");
 		persons[arraySize + 1] = person;
 
-		person = Person.createRandomPerson();
+		person = createRandomPerson();
 		person.setSex(person.new Sex(Sex.MAN));
 		person.setAge(10);
 		person.setName("Max");
 		persons[arraySize + 2] = person;
 
-		person = Person.createRandomPerson();
+		person = createRandomPerson();
 		person.setSex(person.new Sex(Sex.MAN));
 		person.setAge(10);
 		person.setName("Ivan");
@@ -90,4 +91,25 @@ public class Main {
 		return  sortedPersons;
 	}
 
+	// + статические методы - зло :)
+	// + на самом деле нет ни одной хорошей причины, чтобы этот метод был в этом классе и раздувал его
+	/**
+	 * Create person with random information
+	 */
+	public static Person createRandomPerson() {
+		Person person = new Person();
+
+		Random random = new Random();
+		person.setAge(random.nextInt(100));
+		person.setName("DefaultName_" + random.nextInt(65535));
+
+
+		Sex sex = random.nextInt(2) == 1 ?
+				person.new Sex(Sex.MAN) :
+				person.new Sex(Sex.WOMAN);
+
+		person.setSex(sex);
+
+		return person;
+	}
 }
