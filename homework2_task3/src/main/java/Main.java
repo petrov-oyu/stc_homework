@@ -78,13 +78,23 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Returns new sorted array. Sorting algorithm depends on sorter
+	 * @param persons
+	 * @param sorter
+	 * @return
+	 */
 	private static Person[] sortPersons(Person[] persons, Sorter sorter) {
 		Person[] sortedPersons = Arrays.copyOf(persons, persons.length);
+
+		long timeNow = System.currentTimeMillis();
 		try {
 			sorter.sort(sortedPersons);
 		} catch (SamePersonException e) {
 			System.err.println(e.getMessage());
 		}
+
+		System.out.println(sorter.getName() + " spent " + (System.currentTimeMillis() - timeNow) + " ms for sorting");
 
 		System.out.println("After " + sorter.getName() + ": " + Arrays.toString(sortedPersons));
 
@@ -96,7 +106,7 @@ public class Main {
 	/**
 	 * Create person with random information
 	 */
-	public static Person createRandomPerson() {
+	private static Person createRandomPerson() {
 		Person person = new Person();
 
 		Random random = new Random();

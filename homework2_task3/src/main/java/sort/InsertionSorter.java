@@ -9,13 +9,10 @@ import base.Person;
 public class InsertionSorter implements Sorter {
 	@Override
 	public void sort(Person[] array) throws SamePersonException {
-		// замер времени это не логика сортировки
-		long timeNow = System.currentTimeMillis();
 		insertionSort(array);
-		System.out.println(this.getName() + " spent " + (System.currentTimeMillis() - timeNow) + " ms for sorting");
 	}
 
-	public static void insertionSort(Person[] array) {
+	private void insertionSort(Person[] array) {
 		for (int i = 1; i < array.length; i++) {
 			Person current = array[i];
 			int j = i - 1;
