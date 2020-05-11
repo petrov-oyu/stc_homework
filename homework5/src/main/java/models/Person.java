@@ -1,4 +1,4 @@
-package base;
+package models;
 
 import java.util.Objects;
 
@@ -47,8 +47,6 @@ public class Person implements Comparable<Person>{
 	}
 
 	public void setAge(Integer age) {
-		// + во-первых, что вы имеете против долгожителей? :)
-		// + во-вторых условие всегда будет true
 		if (age > 0 && age <= 100) {
 			this.age = age;
 		} else {
