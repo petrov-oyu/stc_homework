@@ -17,7 +17,6 @@ import java.util.Set;
 public class Main {
 	public static void main(String[] args) {
 		int arraySize = 3;
-		Person[] persons = new Person[arraySize];
 
 		Person[] persons = new Person[arraySize + 4];
 		for (int i = 0; i < arraySize; i++) {
@@ -69,7 +68,7 @@ public class Main {
 			assertionCount = arraySize;
 		}
 
-		// а что если деффект вкрался в оба алгоритма и оба сортируют не правильно?
+		// + а что если деффект вкрался в оба алгоритма и оба сортируют не правильно?
 
 		for (int i = 0; i < assertionCount; i++) {
 			assert insertionPersons[i].getAge().equals(quickPersons[i].getAge());
