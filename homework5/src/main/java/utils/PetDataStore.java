@@ -5,7 +5,7 @@ import models.Pet;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -42,13 +42,13 @@ public class PetDataStore {
 
 	/**
 	 * Поиск животного по его кличке.
-	 * Returns set of {@link Pet} with given name.
+	 * Returns list of {@link Pet} with given name.
 	 * If {@link Pet} with given name not found, then returns empty set
 	 */
-	public Set<Pet> find(String name) {
+	public List<Pet> find(String name) {
 		return pets.values().stream()
 				   .filter(pet -> pet.getName().equals(name))
-				   .collect(Collectors.toSet());
+				   .collect(Collectors.toList());
 	}
 
 	/**

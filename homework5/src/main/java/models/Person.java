@@ -16,16 +16,20 @@ public class Person implements Comparable<Person>{
 		return sex;
 	}
 
-	public void setSex(Sex sex) {
+	public Person setSex(Sex sex) {
 		this.sex = sex;
+
+		return this;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public Person setName(String name) {
 		this.name = name;
+
+		return this;
 	}
 
 	public Integer getAge() {
@@ -46,12 +50,14 @@ public class Person implements Comparable<Person>{
 		return Objects.hash(getAge(), getName());
 	}
 
-	public void setAge(Integer age) {
+	public Person setAge(Integer age) {
 		if (age > 0 && age <= 100) {
 			this.age = age;
 		} else {
 			System.err.println("unacceptable age" + age);
 		}
+
+		return this;
 	}
 
 	@Override
