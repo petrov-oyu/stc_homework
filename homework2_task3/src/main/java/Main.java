@@ -18,9 +18,9 @@ public class Main {
 		int arraySize = 3;
 		Person[] persons = new Person[arraySize];
 //		Person[] persons = new Person[arraySize + 4];
-		for (int i = 0; i < arraySize; i++) {
-			persons[i] = Person.createRandomPerson();
-		}
+//		for (int i = 0; i < arraySize; i++) {
+//			persons[i] = Person.createRandomPerson();
+//		}
 
 		//should be as builder:
 //		Person person = Person.createRandomPerson();
