@@ -21,6 +21,7 @@ build/
 
 # gradle
 */.gradle/
+*/gradle/
 */build/
 
 # Compiled class file
