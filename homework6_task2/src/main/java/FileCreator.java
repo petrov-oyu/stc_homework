@@ -1,6 +1,5 @@
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.LinkedList;
 import java.util.Random;
 
 /**
@@ -17,7 +16,7 @@ import java.util.Random;
  * Необходимо написать метод getFiles(String path, int n, int size, String[] words, int probability),
  *      который создаст n файлов размером size в каталоге path. words - массив слов, probability - вероятность.
  *
- * Represents a util for creation text file with rules:
+ * Represents a class for creation text file with rules:
  * 1) random from 1 to 15 words
  * 2) word has from 1 to 15 chars
  * 3) words can be separate by " " or ", "
@@ -33,9 +32,6 @@ public class FileCreator {
 	private static final int CHARS_IN_WORD = 15;
 	private static final int WORDS_IN_SENTENCE = 15;
 	private static final int SENTENCES_IN_PARAGRAPH = 20;
-	private static final String[] WORD_SEPARATORS = new String[]{" ", ", "};
-	private static final String[] SENTENCE_SEPARATORS = new String[]{". ", "! ", "? "};
-	private static final String[] PARAGRAPH_SEPARATORS = new String[]{System.lineSeparator() + System.lineSeparator()};
 	private static final String[] VALID_CHARS = new String[]{"q", "w", "e", "r", "t", "y",
 			"u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v", "b", "n", "m"};
 
@@ -44,9 +40,6 @@ public class FileCreator {
 	// билдер слов(где можно предусмотреть несколько релизаций),
 	// билдер предложений(который требует билдер слов),
 	// билдер абзацов(который требует билдер предложений)
-	private FileCreator() {
-		//closed constructor for an utility class
-	}
 
 	/**
 	 * Создаст n файлов размером size в каталоге path. words - массив слов, probability - вероятность.
@@ -58,112 +51,172 @@ public class FileCreator {
 	 * @param probability if probability == 1, then sentences in text will contain word from given array.
 	 *                       if probability == 100. then 1 from 100 sentences in text will contain word from given array.
  	 */
-	public static void getFiles(String path, int n, int size, String[] words, int probability) {
+	public void getFiles(String path, int n, int size, String[] words, int probability) {
+		
+		ParagraphBuilder paragraphBuilder = new ParagraphBuilder();
+		SentenceBuilder sentenceBuilder = new SentenceBuilder();
+		WordBuilder wordBuilder = new WordBuilder();
+
+		StringBuilder resultText = new StringBuilder();
 		StringBuilder stringBuilder = new StringBuilder();
-		byte[] bytes = stringBuilder.toString().getBytes(CHARSET);
+
+		int charsInWord;
+		int sentencesInParagraph;
+		int wordsInSentence;
+		
+		int currentSize = 0;
+		while (currentSize < size) {
+			resultText.append(stringBuilder);
+
+			paragraphBuilder.clear();
+			sentencesInParagraph = RANDOM.nextInt(SENTENCES_IN_PARAGRAPH) + 1;
+
+			for (int currentSentencesInParagraph = 0; currentSentencesInParagraph < sentencesInParagraph; currentSentencesInParagraph++) {
+				sentenceBuilder.clear();
+				wordsInSentence = RANDOM.nextInt(WORDS_IN_SENTENCE) + 1;
+
+				for (int currentWordsInSentence = 0; currentWordsInSentence < wordsInSentence; currentWordsInSentence++) {
+					wordBuilder.clear();
+					charsInWord = RANDOM.nextInt(CHARS_IN_WORD) + 1;
+					for (int currentCharsInWord = 0; currentCharsInWord < charsInWord; currentCharsInWord++) {
+						wordBuilder.addChild(new StringBuilder(createLowerCaseChar()));
+					}
+					sentenceBuilder.addChild(wordBuilder.build());
+				}
+
+				paragraphBuilder.addChild(sentenceBuilder.build());
+			}
+
+			charsInWord =   RANDOM.nextInt(CHARS_IN_WORD) + 1;
 
 
+			stringBuilder = paragraphBuilder.build();
+			stringBuilder.append(System.lineSeparator()).append(System.lineSeparator());
+			byte[] bytes = stringBuilder.toString().getBytes(CHARSET);
 
-		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-
-		     ) {
-
-
-		} catch (IOException e) {
-			e.printStackTrace();
+			currentSize = bytes.length;
+			//System.err.println(currentSize);
 		}
+
+		System.err.println(paragraphBuilder.build());
+
+		if (currentSize == size)
+			//TODO write to file 
+			return;
 	}
 
-	private static StringBuilder appendLowerCaseChar(StringBuilder stringBuilder) {
+	private StringBuilder buildFirstWordInSentence(StringBuilder stringBuilder) {
+		String firstLetter = stringBuilder.substring(0, 0);
+		stringBuilder.replace(0,0, firstLetter.toUpperCase());
+		return  stringBuilder;
+	}
+
+	private boolean getProbabilityResult(int probability) {
+		return RANDOM.nextInt(probability) == 0;
+	}
+
+	private static String createUpperCaseChar() {
 		int randomIndex = RANDOM.nextInt(VALID_CHARS.length);
-		return stringBuilder.append(VALID_CHARS[randomIndex]);
+		return  VALID_CHARS[randomIndex].toUpperCase();
 	}
 
-	private static StringBuilder appendUpperCaseChar(StringBuilder stringBuilder) {
+	private static String createLowerCaseChar() {
 		int randomIndex = RANDOM.nextInt(VALID_CHARS.length);
-		return stringBuilder.append(VALID_CHARS[randomIndex].toUpperCase());
+		return  VALID_CHARS[randomIndex];
 	}
 
-	private static StringBuilder appendWordWithProbabilityAddedFromExternalArray(StringBuilder stringBuilder,
-	                                                                             int wordLength,
-	                                                                             String[] words,
-	                                                                             int probability) {
-		int isContainWordFromArray = RANDOM.nextInt(probability);
+	class WordBuilder extends TextBuilderImpl {
+		@Override
+		public StringBuilder build() {
+			StringBuilder previousWord = new StringBuilder();
+			children.forEach((letter) -> {
+				previousWord.append(letter);
+			});
 
-		if (isContainWordFromArray == 0) {
-			int randomIndex = RANDOM.nextInt(words.length);
-			return stringBuilder.append(words[randomIndex]);
+			return  previousWord;
+		}
+	}
+
+	class SentenceBuilder extends TextBuilderImpl {
+		private final String[] WORD_SEPARATORS = new String[]{" ", ", "};
+
+		@Override
+		public StringBuilder build() {
+			StringBuilder previousWord = new StringBuilder();
+			children.forEach((word) -> {
+				int randomIndex = RANDOM.nextInt(WORD_SEPARATORS.length);
+				if (previousWord.length() != 0) {
+					previousWord.append(WORD_SEPARATORS[randomIndex]);
+				}
+				previousWord.append(word);
+			});
+
+			return  previousWord;
+		}
+	}
+
+	class ParagraphBuilder extends TextBuilderImpl {
+		private final String[] SENTENCE_SEPARATORS = new String[]{". ", "! ", "? "};
+
+		@Override
+		public StringBuilder build() {
+			StringBuilder previousSentence = new StringBuilder();
+			children.forEach((sentence) -> {
+				int randomIndex = RANDOM.nextInt(SENTENCE_SEPARATORS.length);
+				if (previousSentence.length() != 0) {
+					previousSentence.append(SENTENCE_SEPARATORS[randomIndex]);
+				}
+				previousSentence.append(sentence);
+			});
+
+			int randomIndex = RANDOM.nextInt(SENTENCE_SEPARATORS.length);
+			previousSentence.append(SENTENCE_SEPARATORS[randomIndex]);
+
+			return  previousSentence;
+		}
+	}
+
+	abstract class TextBuilderImpl implements TextBuilder {
+		protected LinkedList<StringBuilder> children = new LinkedList<>();
+
+		@Override
+		public void addChild(StringBuilder stringBuilder) {
+			children.add(stringBuilder);
 		}
 
-		return appendWord(stringBuilder, wordLength);
-	}
-
-	private static StringBuilder appendWord(StringBuilder stringBuilder, int wordLength) {
-		int currentCharsInWord = 0;
-		while (currentCharsInWord < wordLength) {
-			appendLowerCaseChar(stringBuilder);
-			currentCharsInWord ++;
+		@Override
+		public LinkedList<StringBuilder> getChildren() {
+			return children;
 		}
 
-		return stringBuilder;
-	}
-
-	private static StringBuilder appendWordWithCapitalLetter(StringBuilder stringBuilder, int wordLength) {
-		appendUpperCaseChar(stringBuilder);
-		return appendWord(stringBuilder, wordLength - 1);
-	}
-
-	private static  StringBuilder appendWordSeparator(StringBuilder stringBuilder) {
-		int randomIndex = RANDOM.nextInt(WORD_SEPARATORS.length);
-		return stringBuilder.append(WORD_SEPARATORS[randomIndex]);
-	}
-
-	private static StringBuilder appendSentence(StringBuilder stringBuilder, int wordsInSentence,
-	                                            String[] words, int probability) {
-		int charsInWord = RANDOM.nextInt(CHARS_IN_WORD) + 1;
-		int currentWordsInSentence = 0;
-
-		//first word
-		appendWordWithCapitalLetter(stringBuilder, charsInWord);
-		currentWordsInSentence++;
-
-		if (wordsInSentence == 1) {
-			return stringBuilder;
+		@Override
+		public void clear() {
+			children.clear();
 		}
-
-		appendWordSeparator(stringBuilder);
-		if (wordsInSentence > 2) {
-			//middle words
-			while (currentWordsInSentence < wordsInSentence - 1) {
-				appendWordWithProbabilityAddedFromExternalArray(stringBuilder, charsInWord,
-						words, probability);
-				appendWordSeparator(stringBuilder);
-				currentWordsInSentence++;			}
-		}
-
-		//last word
-		appendWord(stringBuilder, charsInWord);
-		currentWordsInSentence++;
-
-		return stringBuilder;
 	}
 
-	private static StringBuilder appendSentenceSeparator(StringBuilder stringBuilder) {
-		int randomIndex = RANDOM.nextInt(SENTENCE_SEPARATORS.length);
-		return stringBuilder.append(SENTENCE_SEPARATORS[randomIndex]);
-	}
+	interface TextBuilder {
+		/**
+		 * Add children of this text
+		 * @param stringBuilder
+		 */
+		void addChild(StringBuilder stringBuilder);
 
-	private static StringBuilder appendParagraph(StringBuilder stringBuilder, int sentencesInParagraph,
-	                                             String[] words, int probability) {
-		int wordsInSentence = RANDOM.nextInt(WORDS_IN_SENTENCE) + 1;
-		int currentSentencesInParagraph = 0;
+		/**
+		 * Get all children of this text
+		 * @return
+		 */
+		LinkedList<StringBuilder> getChildren();
 
-		while (currentSentencesInParagraph < sentencesInParagraph) {
-			appendSentence(stringBuilder, wordsInSentence, words, probability);
-			appendSentenceSeparator(stringBuilder);
-			currentSentencesInParagraph++;
-		}
+		/**
+		 * clear children
+		 */
+		void clear();
 
-		return stringBuilder;
+		/**
+		 * Build text from all children and separators between them.
+		 * @return
+		 */
+		StringBuilder build();
 	}
 }
