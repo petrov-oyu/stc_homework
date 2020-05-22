@@ -52,6 +52,7 @@ public class FileCreator {
 
 		int sentencesInParagraph;
 		int wordsInSentence;
+		int userWordInSentence;
 
 		while (resultText.toString().getBytes(CHARSET).length < size) {
 			Builder textBuilder = new TextBuilder();
@@ -74,13 +75,13 @@ public class FileCreator {
 				paragraphBuilder.addChild(sentenceBuilder);
 			}
 			wordsInSentence = RANDOM.nextInt(WORDS_IN_SENTENCE) + 1;
-			if (getProbabilityResult(probability)) {
-				sentenceBuilder.addChild(userWordBuilder);
-			} else {
-				sentenceBuilder.addChild(wordBuilder);
-			}
-			for (int i = 1; i < wordsInSentence; i++) {
-				sentenceBuilder.addChild(wordBuilder);
+			userWordInSentence = RANDOM.nextInt(wordsInSentence);
+			for (int i = 0; i < wordsInSentence; i++) {
+				if (i == userWordInSentence && getProbabilityResult(probability)) {
+					sentenceBuilder.addChild(userWordBuilder);
+				} else {
+					sentenceBuilder.addChild(wordBuilder);
+				}
 			}
 
 			resultText.append(textBuilder.build());
