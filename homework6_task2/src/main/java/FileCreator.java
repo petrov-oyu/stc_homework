@@ -29,17 +29,8 @@ import java.util.Random;
 public class FileCreator {
 	private static final Charset CHARSET = Charset.forName("UTF-8");
 	private static final Random RANDOM = new Random();
-	private static final int CHARS_IN_WORD = 15;
 	private static final int WORDS_IN_SENTENCE = 15;
 	private static final int SENTENCES_IN_PARAGRAPH = 20;
-	private static final String[] VALID_CHARS = new String[]{"q", "w", "e", "r", "t", "y",
-			"u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v", "b", "n", "m"};
-
-
-	//TODO это больше похоже на несколько билдеров(с единым интерфейсом):
-	// билдер слов(где можно предусмотреть несколько релизаций),
-	// билдер предложений(который требует билдер слов),
-	// билдер абзацов(который требует билдер предложений)
 
 	/**
 	 * Создаст n файлов размером size в каталоге path. words - массив слов, probability - вероятность.
@@ -52,166 +43,219 @@ public class FileCreator {
 	 *                       if probability == 100. then 1 from 100 sentences in text will contain word from given array.
  	 */
 	public void getFiles(String path, int n, int size, String[] words, int probability) {
-		
-		ParagraphBuilder paragraphBuilder = new ParagraphBuilder();
-		SentenceBuilder sentenceBuilder = new SentenceBuilder();
-		WordBuilder wordBuilder = new WordBuilder();
-
 		StringBuilder resultText = new StringBuilder();
-		StringBuilder stringBuilder = new StringBuilder();
 
-		int charsInWord;
-		int sentencesInParagraph;
-		int wordsInSentence;
-		
-		int currentSize = 0;
-		while (currentSize < size) {
-			resultText.append(stringBuilder);
+		int sentencesInParagraph = RANDOM.nextInt(SENTENCES_IN_PARAGRAPH) + 1;
+		int wordsInSentence = RANDOM.nextInt(WORDS_IN_SENTENCE) + 1;
 
-			paragraphBuilder.clear();
-			sentencesInParagraph = RANDOM.nextInt(SENTENCES_IN_PARAGRAPH) + 1;
+		TextBuilder textBuilder = new TextBuilderImpl();
+		textBuilder.setSize(size);
+		TextBuilder paragraphBuilder = new ParagraphBuilder();
+		TextBuilder sentenceBuilder = new ParagraphBuilder();
+		TextBuilder wordBuilder = new ParagraphBuilder();
 
-			for (int currentSentencesInParagraph = 0; currentSentencesInParagraph < sentencesInParagraph; currentSentencesInParagraph++) {
-				sentenceBuilder.clear();
-				wordsInSentence = RANDOM.nextInt(WORDS_IN_SENTENCE) + 1;
-
-				for (int currentWordsInSentence = 0; currentWordsInSentence < wordsInSentence; currentWordsInSentence++) {
-					wordBuilder.clear();
-					charsInWord = RANDOM.nextInt(CHARS_IN_WORD) + 1;
-					for (int currentCharsInWord = 0; currentCharsInWord < charsInWord; currentCharsInWord++) {
-						wordBuilder.addChild(new StringBuilder(createLowerCaseChar()));
-					}
-					sentenceBuilder.addChild(wordBuilder.build());
-				}
-
-				paragraphBuilder.addChild(sentenceBuilder.build());
-			}
-
-			charsInWord =   RANDOM.nextInt(CHARS_IN_WORD) + 1;
-
-
-			stringBuilder = paragraphBuilder.build();
-			stringBuilder.append(System.lineSeparator()).append(System.lineSeparator());
-			byte[] bytes = stringBuilder.toString().getBytes(CHARSET);
-
-			currentSize = bytes.length;
-			//System.err.println(currentSize);
-		}
-
-		System.err.println(paragraphBuilder.build());
-
-		if (currentSize == size)
-			//TODO write to file 
-			return;
-	}
-
-	private StringBuilder buildFirstWordInSentence(StringBuilder stringBuilder) {
-		String firstLetter = stringBuilder.substring(0, 0);
-		stringBuilder.replace(0,0, firstLetter.toUpperCase());
-		return  stringBuilder;
+		textBuilder.addChild(paragraphBuilder);
+		paragraphBuilder.addChild(sentenceBuilder);
+		sentenceBuilder.addChild(wordBuilder);
 	}
 
 	private boolean getProbabilityResult(int probability) {
 		return RANDOM.nextInt(probability) == 0;
 	}
 
-	private static String createUpperCaseChar() {
-		int randomIndex = RANDOM.nextInt(VALID_CHARS.length);
-		return  VALID_CHARS[randomIndex].toUpperCase();
-	}
-
-	private static String createLowerCaseChar() {
-		int randomIndex = RANDOM.nextInt(VALID_CHARS.length);
-		return  VALID_CHARS[randomIndex];
-	}
-
+	/**
+	 * Word builder which build word with random chars. Word contains from 1 to 15 chars
+	 */
 	class WordBuilder extends TextBuilderImpl {
+		private final int CHARS_IN_WORD = 15;
+		private final String[] VALID_CHARS = new String[]{"q", "w", "e", "r", "t", "y",
+				"u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v", "b", "n", "m"};
+
 		@Override
 		public StringBuilder build() {
-			StringBuilder previousWord = new StringBuilder();
-			children.forEach((letter) -> {
-				previousWord.append(letter);
-			});
+			currentSize = 0;
+			StringBuilder word = new StringBuilder();
 
-			return  previousWord;
+			int charsInWord = RANDOM.nextInt(CHARS_IN_WORD) + 1;
+			for (int i = 0; i < charsInWord; i++) {
+				append(word, createLowerCaseChar());
+			}
+
+			return  word;
+		}
+
+		private String createLowerCaseChar() {
+			int randomIndex = RANDOM.nextInt(VALID_CHARS.length);
+			return  VALID_CHARS[randomIndex];
 		}
 	}
 
+	/**
+	 * Sentence builder which contains words as children
+	 */
 	class SentenceBuilder extends TextBuilderImpl {
 		private final String[] WORD_SEPARATORS = new String[]{" ", ", "};
 
 		@Override
 		public StringBuilder build() {
-			StringBuilder previousWord = new StringBuilder();
-			children.forEach((word) -> {
+			currentSize = 0;
+			StringBuilder sentence = new StringBuilder();
+
+			children.forEach((wordBuilder) -> {
+				StringBuilder separator = new StringBuilder();
+
 				int randomIndex = RANDOM.nextInt(WORD_SEPARATORS.length);
-				if (previousWord.length() != 0) {
-					previousWord.append(WORD_SEPARATORS[randomIndex]);
+				if (sentence.length() != 0) {
+					separator.append(WORD_SEPARATORS[randomIndex]);
 				}
-				previousWord.append(word);
+
+				wordBuilder.setSize(maxSize
+						- currentSize
+						- separator.toString().getBytes(CHARSET).length);
+
+				StringBuilder word = wordBuilder.build();
+				if (sentence.length() == 0) {
+					//its first word, then it have to start with capitilize letter
+					word = changeToFirstWordInSentence(word);
+				}
+
+				append(sentence, separator.append(word));
 			});
 
-			return  previousWord;
+			return sentence;
+		}
+
+		private StringBuilder changeToFirstWordInSentence(StringBuilder stringBuilder) {
+			String firstLetter = stringBuilder.substring(0, 0);
+			stringBuilder.replace(0,0, firstLetter.toUpperCase());
+			return  stringBuilder;
 		}
 	}
 
+
+	/**
+	 * Paragraph builder which contains sentences as children
+	 */
 	class ParagraphBuilder extends TextBuilderImpl {
 		private final String[] SENTENCE_SEPARATORS = new String[]{". ", "! ", "? "};
 
 		@Override
 		public StringBuilder build() {
-			StringBuilder previousSentence = new StringBuilder();
-			children.forEach((sentence) -> {
+			currentSize = 0;
+			StringBuilder paragraph = new StringBuilder();
+
+			int randomIndexForCloseSeparator = RANDOM.nextInt(SENTENCE_SEPARATORS.length);
+
+			children.forEach((sentenceBuilder) -> {
+				StringBuilder sentence = new StringBuilder();
+
 				int randomIndex = RANDOM.nextInt(SENTENCE_SEPARATORS.length);
-				if (previousSentence.length() != 0) {
-					previousSentence.append(SENTENCE_SEPARATORS[randomIndex]);
+				if (paragraph.length() != 0) {
+					sentence.append(SENTENCE_SEPARATORS[randomIndex]);
 				}
-				previousSentence.append(sentence);
+
+				sentenceBuilder.setSize(maxSize
+						- currentSize
+						- sentence.toString().getBytes(CHARSET).length
+						- SENTENCE_SEPARATORS[randomIndexForCloseSeparator].getBytes(CHARSET).length);
+				sentence.append(sentenceBuilder.build());
+				append(paragraph, sentence);
 			});
 
-			int randomIndex = RANDOM.nextInt(SENTENCE_SEPARATORS.length);
-			previousSentence.append(SENTENCE_SEPARATORS[randomIndex]);
-
-			return  previousSentence;
+			return  append(paragraph, SENTENCE_SEPARATORS[randomIndexForCloseSeparator]);
 		}
 	}
 
-	abstract class TextBuilderImpl implements TextBuilder {
-		protected LinkedList<StringBuilder> children = new LinkedList<>();
+	/**
+	 * Text builder which contains paragraphs as children
+	 */
+	class TextBuilderImpl implements TextBuilder {
+		private final String PARAGRAPH_SEPARATOR = System.lineSeparator();
+		protected LinkedList<TextBuilder> children = new LinkedList<>();
+		protected int maxSize = 0;
+		protected int currentSize = 0;
 
 		@Override
-		public void addChild(StringBuilder stringBuilder) {
-			children.add(stringBuilder);
+		public void addChild(TextBuilder builder) {
+			children.add(builder);
+		}
+
+
+		@Override
+		public void setSize(int maxSize) {
+			this.maxSize = maxSize;
 		}
 
 		@Override
-		public LinkedList<StringBuilder> getChildren() {
-			return children;
+		public StringBuilder build() {
+			currentSize = 0;
+			StringBuilder text = new StringBuilder();
+
+			children.forEach((paragraphBuilder) -> {
+				StringBuilder paragraph = new StringBuilder();
+				if (text.length() != 0) {
+					paragraph.append(PARAGRAPH_SEPARATOR);
+				}
+
+				paragraphBuilder.setSize(maxSize
+						- currentSize
+						- paragraph.toString().getBytes(CHARSET).length
+						- PARAGRAPH_SEPARATOR.getBytes(CHARSET).length);
+				paragraph.append(paragraphBuilder.build());
+
+				append(text, paragraph);
+			});
+
+			return  append(text, PARAGRAPH_SEPARATOR);
 		}
 
-		@Override
-		public void clear() {
-			children.clear();
+		/**
+		 * if size of result text is not greater then {@link TextBuilderImpl#maxSize},
+		 * then append current text and recalc {@link TextBuilderImpl#currentSize},
+		 * else doesn't change current text and {@link TextBuilderImpl#currentSize}
+		 * @param text current text
+		 * @param addText text which append to current text
+		 */
+		protected StringBuilder append(StringBuilder text, String addText) {
+			int sizeAfterAppend = currentSize + addText.getBytes(CHARSET).length;
+			if (sizeAfterAppend > maxSize) {
+				return text;
+			}
+
+			currentSize = sizeAfterAppend;
+			return text.append(addText);
+		}
+
+		/**
+		 * if size of result text is not greater then {@link TextBuilderImpl#maxSize},
+		 * then append current text and recalc {@link TextBuilderImpl#currentSize},
+		 * else doesn't change current text and {@link TextBuilderImpl#currentSize}
+		 * @param text current text
+		 * @param addText text which append to current text
+		 */
+		protected StringBuilder append(StringBuilder text, StringBuilder addText) {
+			int sizeAfterAppend = currentSize + addText.toString().getBytes(CHARSET).length;
+			if (sizeAfterAppend > maxSize) {
+				return text;
+			}
+
+			currentSize = sizeAfterAppend;
+			return text.append(addText);
 		}
 	}
 
 	interface TextBuilder {
 		/**
 		 * Add children of this text
-		 * @param stringBuilder
+		 * @param builder
 		 */
-		void addChild(StringBuilder stringBuilder);
+		void addChild(TextBuilder builder);
+
 
 		/**
-		 * Get all children of this text
-		 * @return
+		 * set max bytes quantity of this text.
 		 */
-		LinkedList<StringBuilder> getChildren();
-
-		/**
-		 * clear children
-		 */
-		void clear();
+		void setSize(int maxSize);
 
 		/**
 		 * Build text from all children and separators between them.
