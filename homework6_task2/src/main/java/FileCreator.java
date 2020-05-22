@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -47,7 +48,7 @@ public class FileCreator {
 	 * @param probability if probability == 1, then sentences in text will contain word from given array.
 	 *                       if probability == 100. then 1 from 100 sentences in text will contain word from given array.
  	 */
-	public void getFiles(String path, int n, int size, String[] words, int probability) {
+	public void getFiles(String path, int n, int size, List<String> words, int probability) {
 		StringBuilder resultText = new StringBuilder();
 
 		int sentencesInParagraph;
@@ -64,7 +65,7 @@ public class FileCreator {
 				@Override
 				public StringBuilder build() {
 					currentSize = 0;
-					String userWord = words[RANDOM.nextInt(words.length)];
+					String userWord = words.get(RANDOM.nextInt(words.size()));
 					return append(new StringBuilder(), userWord);
 				}
 			};
@@ -91,9 +92,7 @@ public class FileCreator {
 			File file = new File(path.concat("File")
 					.concat(String.valueOf(i)
 					.concat(".txt")));
-			if (!new File(path).mkdirs()) {
-				System.err.println("directory doesnt created");
-			}
+			new File(path).mkdirs();
 
 			try (FileWriter fw = new FileWriter(file);
 			     BufferedWriter bw = new BufferedWriter(fw)) {
