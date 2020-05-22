@@ -1,3 +1,5 @@
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -78,21 +80,23 @@ public class FileCreator {
 				sentenceBuilder.addChild(wordBuilder);
 			}
 			for (int i = 1; i < wordsInSentence; i++) {
-				if (getProbabilityResult(probability)) {
-					sentenceBuilder.addChild(userWordBuilder);
-				} else {
-					sentenceBuilder.addChild(wordBuilder);
-				}
+				sentenceBuilder.addChild(wordBuilder);
 			}
 
 			resultText.append(textBuilder.build());
 		}
 
 		for (int i = 0; i < n; i++) {
-			try (FileWriter fw = new FileWriter(path
-					.concat(new WordBuilder().build().toString())
-					.concat(".txt"))) {
-				fw.write(resultText.toString());
+			File file = new File(path.concat("File")
+					.concat(String.valueOf(i)
+					.concat(".txt")));
+			if (!new File(path).mkdirs()) {
+				System.err.println("directory doesnt created");
+			}
+
+			try (FileWriter fw = new FileWriter(file);
+			     BufferedWriter bw = new BufferedWriter(fw)) {
+				bw.write(resultText.toString());
 			} catch (IOException e) {
 				System.err.println(e.getMessage());
 			}
@@ -106,7 +110,7 @@ public class FileCreator {
 	/**
 	 * Word builder which build word with random chars. Word contains from 1 to 15 chars
 	 */
-	class WordBuilder extends BuilderImpl {
+	static class WordBuilder extends BuilderImpl {
 		private final String[] VALID_CHARS = new String[]{"q", "w", "e", "r", "t", "y",
 				"u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v", "b", "n", "m"};
 
@@ -132,7 +136,7 @@ public class FileCreator {
 	/**
 	 * Sentence builder which contains words as children
 	 */
-	class SentenceBuilder extends BuilderImpl {
+	static class SentenceBuilder extends BuilderImpl {
 		private final String[] WORD_SEPARATORS = new String[]{" ", ", "};
 
 		@Override
@@ -176,7 +180,7 @@ public class FileCreator {
 	/**
 	 * Paragraph builder which contains sentences as children
 	 */
-	class ParagraphBuilder extends BuilderImpl {
+	static class ParagraphBuilder extends BuilderImpl {
 		private final String[] SENTENCE_SEPARATORS = new String[]{". ", "! ", "? "};
 
 		@Override
@@ -209,7 +213,7 @@ public class FileCreator {
 	/**
 	 * Text builder which contains paragraphs as children
 	 */
-	class TextBuilder extends BuilderImpl {
+	static class TextBuilder extends BuilderImpl {
 		private final String PARAGRAPH_SEPARATOR = System.lineSeparator();
 
 		@Override
