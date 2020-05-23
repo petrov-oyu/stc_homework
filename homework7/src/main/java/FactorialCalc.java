@@ -72,15 +72,15 @@ public class FactorialCalc {
 	 */
 	static BigInteger calcFactorial(Long number) {
 		System.err.println("My number : " + number + ". My thread : " + Thread.currentThread().getName());
-		BigInteger result = new BigInteger("1");
+		BigInteger result = BigInteger.valueOf(1L);
 		long tempNumber = number;
 		while(tempNumber > 1L) {
 			BigInteger factorialResult = factorialResults.get(tempNumber);
 			if (factorialResult == null) {
-				result.multiply(new BigInteger(String.valueOf(tempNumber)));
+				result = result.multiply(BigInteger.valueOf(tempNumber));
 				tempNumber = tempNumber - 1L;
 			} else {
-				result.multiply(factorialResult);
+				result = result.multiply(factorialResult);
 				break;
 			}
 		}
