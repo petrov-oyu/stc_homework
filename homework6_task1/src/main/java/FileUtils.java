@@ -12,18 +12,20 @@ import java.util.stream.Stream;
  * Найденные слова не должны повторяться,
  * регистр не должен учитываться. Одно слово в разных падежах – это разные слова.
  */
-public class FileUtils {
-	public void sortWordsOnFile() {
+public final class FileUtils {
+	private  FileUtils() {
+		//util cannot be instance
+	}
+
+	public static void sortWordsOnFile() {
 		Set<String> words = new HashSet<>(0);
 
 		try (FileReader fr = new FileReader(new File("D:\\test.txt"))) {
 			BufferedReader br = new BufferedReader(fr);
 			words = br.lines()
-					.flatMap((line) -> Stream.of(line.split(" ")))
+					.flatMap((line) -> Stream.of(line.split("\\s")))
 					.sorted((w1, w2) -> w1.compareToIgnoreCase(w2))
 					.collect(Collectors.toCollection(LinkedHashSet::new));
-		} catch (FileNotFoundException e) {
-			System.err.println(e);
 		} catch (IOException e) {
 			System.err.println(e);
 		}
