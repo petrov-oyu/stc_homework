@@ -19,7 +19,7 @@ import java.util.Scanner;
 public class WorkerCreator {
 
 	/**
-	 * Create worker from file "d:\\SomeClass.java"
+	 * Create {@link Worker} instance from console input
 	 * @return custom instance of worker or null if cannot create class instance
 	 */
 	public Worker create() {
