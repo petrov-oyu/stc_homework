@@ -4,7 +4,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -40,26 +39,21 @@ public class FactorialCalc {
 	 * @param numbers
 	 */
 	static void calcFactorials(List<Long> numbers) {
-		AtomicInteger counterOfDoneCalcs  = new AtomicInteger(0);
-
 		ExecutorService executor = Executors.newFixedThreadPool(4);
 
 		List<Callable<BigInteger>> taskList = numbers
 				.stream()
 				.map((n) -> (Callable<BigInteger>) () -> {
 					BigInteger factorial = calcFactorial(n);
-					counterOfDoneCalcs.getAndIncrement();
 					return factorial;
 				})
 				.collect(Collectors.toList());
 		try {
-			executor.invokeAll(taskList);
+			executor.invokeAll(taskList).forEach((future) -> {
+				//waiting calculation
+			});
 		} catch (InterruptedException e) {
 			System.err.println(e.getMessage());
-		}
-
-		while(counterOfDoneCalcs.get() < numbers.size()) {
-			//waiting calculation
 		}
 
 		System.err.println(factorialResults.toString());
