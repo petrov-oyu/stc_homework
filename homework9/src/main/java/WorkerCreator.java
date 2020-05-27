@@ -10,30 +10,30 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 /**
- * Create worker from console input
+ * Create {@link Worker} from console input
  *
  * @author Petrov_OlegYu
  */
 public class WorkerCreator {
 
 	/**
-	 * Create worker from file ""
+	 * Create worker from file "d:\\SomeClass.java"
 	 * @return custom instance of worker or null if cannot create class instance
 	 */
 	public Worker create() {
+		List<String> lines = new ArrayList<String>();
 		String startLines = "public class SomeClass implements Worker { \n " +
 				"public void doWork() { \n";
-		List<String> inputLines = readLinesFromInput();
 		String endLines = "\n }; " +
 				"\n };";
 
-		inputLines.set(0, startLines);
-		inputLines.add(endLines);
+		lines.add(startLines);
+		lines.addAll(readLinesFromInput());
+		lines.add(endLines);
 
-		writeLinesToJavaFile(inputLines);
+		writeLinesToJavaFile(lines);
 
 		compileJavaFile();
 
@@ -57,8 +57,6 @@ public class WorkerCreator {
 			}
 			inputLines.add(nextLine);
 		}
-
-		System.err.println(inputLines.stream().collect(Collectors.joining("\n")));
 
 		return inputLines;
 	}
