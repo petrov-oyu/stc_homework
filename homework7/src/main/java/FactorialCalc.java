@@ -1,9 +1,6 @@
 import java.math.BigInteger;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -43,14 +40,15 @@ public class FactorialCalc {
 
 		List<Callable<BigInteger>> taskList = numbers
 				.stream()
-				.map((n) -> (Callable<BigInteger>) () -> {
-					BigInteger factorial = calcFactorial(n);
-					return factorial;
-				})
+				.map(n -> (Callable<BigInteger>) () -> calcFactorial(n))
 				.collect(Collectors.toList());
 		try {
 			executor.invokeAll(taskList).forEach((future) -> {
-				//waiting calculation
+				try {
+					future.get();
+				} catch (Exception e) {
+					System.err.println(e.getMessage());
+				}
 			});
 		} catch (InterruptedException e) {
 			System.err.println(e.getMessage());
