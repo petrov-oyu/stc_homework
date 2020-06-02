@@ -37,7 +37,7 @@ public class Serializator {
 		}
 	}
 
-	static StringBuilder serialize (String objName, Object object, StringBuilder stringBuilder) {
+	private static StringBuilder serialize (String objName, Object object, StringBuilder stringBuilder) {
 		addObjectStartFrame(stringBuilder, objName, object.getClass().getName());
 
 		for (Field field: object.getClass().getDeclaredFields()) {
