@@ -10,22 +10,24 @@ import java.util.Scanner;
  * @author Petrov_OlegYuc
  */
 public class ClientFirst {
+	public static final int CLIENT_PORT = 65443;
+
 	/**
 	 * run the method for starting program and enter to chat
 	 */
 	public static void main(String[] args) {
-		new ChatListener(6544).start();
+		Thread chatListener = new ChatListener(CLIENT_PORT);
+		chatListener.start();
 
-		DatagramSocket ds = null;
-		try {
+		try (DatagramSocket ds = new DatagramSocket()) {
 			InetAddress addr = InetAddress.getByName("127.0.0.1");
-			ds = new DatagramSocket();
 
 			Scanner scanner = new Scanner(System.in);
 			while (scanner.hasNextLine()) {
 				String nextLine = scanner.nextLine();
 				if (nextLine.equals("quit")) {
 					ds.close();
+					chatListener.interrupt();
 				}
 
 				byte[] data = nextLine.getBytes();
@@ -34,10 +36,6 @@ public class ClientFirst {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			if (ds != null) {
-				ds.close();
-			}
 		}
 	}
 }

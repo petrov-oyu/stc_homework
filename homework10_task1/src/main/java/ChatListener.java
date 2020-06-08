@@ -1,9 +1,12 @@
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.HashMap;
-import java.util.Map;
 
+/**
+ * Listener for server broadcasting messages
+ *
+ * @author Petrov_OlegYu
+ */
 public class ChatListener extends Thread {
 	private int port;
 
@@ -13,29 +16,19 @@ public class ChatListener extends Thread {
 
 	@Override
 	public void run() {
-		DatagramSocket ds = null;
-		try {
-			ds = new DatagramSocket(port);
+		try (DatagramSocket ds = new DatagramSocket(port)) {
 
-			byte[] buf = new byte[512];
+			byte[] buf = new byte[1028];
 			DatagramPacket packet = new DatagramPacket(buf, buf.length);
 			ds.receive(packet);
 			System.err.println("Start chat::");
 
-			Map<String, String> nameStorage = new HashMap<String, String>();
-			String name = "unknown name";
 			while (true) {
-				System.out.println(name
-						+ " : "
-						+ new String(packet.getData()));
+				System.out.println(new String(packet.getData()));
 				ds.receive(packet);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			if (ds != null) {
-				ds.close();
-			}
 		}
 	}
 }
