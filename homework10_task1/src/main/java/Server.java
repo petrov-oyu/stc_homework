@@ -1,3 +1,7 @@
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -13,6 +17,12 @@ import java.util.Objects;
  * Каждый клиент после запуска отправляет свое имя серверу. После чего начинает отправлять ему сообщения.
  * Каждое сообщение сервер подписывает именем клиента и рассылает всем клиентам (broadcast).
  *
+ * Усовершенствовать задание 1:
+ *
+ * a.      добавить возможность отправки личных сообщений (unicast).
+ *
+ * b.      добавить возможность выхода из чата с помощью написанной в чате команды «quit»
+ *
  * @author Petrov_OlegYu
  */
 public class Server {
@@ -22,9 +32,7 @@ public class Server {
 	 * Create socket server and waiting a client logging
 	 */
 	public static void main(String[] args) {
-		try (DatagramSocket ds = new DatagramSocket(SERVER_PORT);) {
-			ds.setBroadcast(true);
-
+		try (DatagramSocket ds = new DatagramSocket(SERVER_PORT)) {
 			byte[] buf = new byte[1028];
 			DatagramPacket packet = new DatagramPacket(buf, buf.length);
 			ds.receive(packet);
@@ -37,7 +45,16 @@ public class Server {
 				if (name == null) {
 					nameStorage.put(clientId, getName(packet));
 				} else {
-					sendBroadCastMessage(ds, name, new String(packet.getData()));
+					JsonElement jsonPacket = JsonParser.parseString(new String(packet.getData()));
+					if (jsonPacket.isJsonObject()) {
+						if (isPrivateMessage(jsonPacket.getAsJsonObject())) {
+							sendPrivateMessage(ds, name, nameStorage, jsonPacket.getAsJsonObject());
+						} else {
+							sendBroadCastMessage(ds, name, jsonPacket.getAsJsonObject());
+						}
+					} else {
+						System.err.println("incorrect message format");
+					}
 				}
 
 				ds.receive(packet);
@@ -45,6 +62,40 @@ public class Server {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static void sendPrivateMessage(DatagramSocket server, String fromWho, Map<ClientID, String> nameStorage, JsonObject jsonPacket) throws IOException {
+		server.setBroadcast(false);
+
+		final String destinationClientName = jsonPacket.get("destination").getAsString();
+
+		//Optional<Entry<ClientID, String>> client =
+		nameStorage.entrySet().stream()
+				.filter(entry -> entry.getValue().equals(destinationClientName))
+				.findFirst()
+				.ifPresent(entry -> {
+					byte[] broadCastBuff = createMessage(fromWho, jsonPacket.get("message").getAsString()).getAsString().getBytes();
+					DatagramPacket broadCastPacket = new DatagramPacket(broadCastBuff, broadCastBuff.length);
+					try {
+						broadCastPacket.setAddress(InetAddress.getByName(entry.getKey().getHostName()));
+						broadCastPacket.setPort(entry.getKey().getPort());
+						server.send(broadCastPacket);
+					} catch (IOException e) {
+						System.err.println("error occurped when sending message");
+					}
+				});
+	}
+
+	private static JsonElement createMessage(String clientName, String clientMessage) {
+		JsonObject packet = new JsonObject();
+		packet.addProperty("clientName", clientName);
+		packet.addProperty("clientMessage", clientMessage);
+
+		return packet;
+	}
+
+	private static boolean isPrivateMessage(JsonObject jsonPacket) {
+		return jsonPacket.has("destination");
 	}
 
 	/**
@@ -59,16 +110,12 @@ public class Server {
 		return name;
 	}
 
-	private static void sendBroadCastMessage(DatagramSocket server, String userName, String userMessage) throws IOException {
-		String message = "@"
-				.concat(userName)
-				.concat(" : ")
-				.concat(userMessage);
-		System.out.println(message);
+	private static void sendBroadCastMessage(DatagramSocket server, String fromWho, JsonObject jsonPacket) throws IOException {
+		server.setBroadcast(true);
+		byte[] broadCastBuff = createMessage(fromWho, jsonPacket.get("message").getAsString()).getAsString().getBytes();
 
-		byte[] broadCastBuff = message.getBytes();
 		DatagramPacket broadCastPacket = new DatagramPacket(broadCastBuff, broadCastBuff.length);
-		broadCastPacket.setAddress(InetAddress.getByName("127.0.0.1"));
+		broadCastPacket.setAddress(InetAddress.getByName("255.255.255.255"));
 		broadCastPacket.setPort(ClientFirst.CLIENT_PORT);
 		server.send(broadCastPacket);
 	}
@@ -108,5 +155,13 @@ public class Server {
 		@Override
 		public int hashCode() {
 			return Objects.hash(hostName, port);
+		}
+
+		public String getHostName() {
+			return hostName;
+		}
+
+		public int getPort() {
+			return port;
 		}
 	}
