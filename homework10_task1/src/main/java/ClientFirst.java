@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * @author Petrov_OlegYuc
  */
 public class ClientFirst {
-	private static final Pattern privateMessagePattern = Pattern.compile("/\\$\\{\\w+\\}/");
+	private static final Pattern privateMessagePattern = Pattern.compile("\\$\\{\\w+\\}");
 
 	public static final int CLIENT_PORT = 65443;
 
@@ -41,14 +41,15 @@ public class ClientFirst {
 				}
 
 				JsonElement packet = JsonNull.INSTANCE;
-				if (isPrivateMessage(nextLine)) {
-					packet = createPrivateMessage(nextLine);
+				Matcher matcher = privateMessagePattern.matcher(nextLine);
+				if (matcher.find()) {
+					packet = createPrivateMessage(nextLine, matcher);
 				} else {
 					packet = createCommonMessage(nextLine);
 				}
 
-				if (!packet.isJsonNull()) {
-					byte[] data = packet.getAsString().getBytes();
+				if (packet.isJsonObject()) {
+					byte[] data = packet.getAsJsonObject().toString().getBytes();
 					DatagramPacket pack = new DatagramPacket(data, data.length, addr, Server.SERVER_PORT);
 					ds.send(pack);
 				} else {
@@ -68,16 +69,12 @@ public class ClientFirst {
 		return packet;
 	}
 
-	private static JsonElement createPrivateMessage(String nextLine) {
-		Matcher matcher = privateMessagePattern.matcher(nextLine);
+	private static JsonObject createPrivateMessage(String nextLine, Matcher matcher) {
 		JsonObject packet = new JsonObject();
-		packet.addProperty("destination", matcher.group());
+		String destination = matcher.group();
+		packet.addProperty("destination", destination.substring(2, destination.length() - 1));
 		packet.addProperty("message", matcher.replaceFirst(""));
 
 		return packet;
-	}
-
-	private static boolean isPrivateMessage(String nextLine) {
-		return privateMessagePattern.matcher(nextLine).find();
 	}
 }

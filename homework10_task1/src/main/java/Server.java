@@ -1,8 +1,11 @@
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -45,8 +48,13 @@ public class Server {
 				if (name == null) {
 					nameStorage.put(clientId, getName(packet));
 				} else {
-					JsonElement jsonPacket = JsonParser.parseString(new String(packet.getData()));
+					ByteArrayInputStream bis = new ByteArrayInputStream(packet.getData());
+					InputStreamReader isr = new InputStreamReader(bis);
+					JsonReader jsonReader = new JsonReader(isr);
+					jsonReader.setLenient(true);
+					JsonElement jsonPacket = JsonParser.parseReader(jsonReader);
 					if (jsonPacket.isJsonObject()) {
+						System.err.println("receiving message: " + jsonPacket.toString());
 						if (isPrivateMessage(jsonPacket.getAsJsonObject())) {
 							sendPrivateMessage(ds, name, nameStorage, jsonPacket.getAsJsonObject());
 						} else {
@@ -67,19 +75,22 @@ public class Server {
 	private static void sendPrivateMessage(DatagramSocket server, String fromWho, Map<ClientID, String> nameStorage, JsonObject jsonPacket) throws IOException {
 		server.setBroadcast(false);
 
-		final String destinationClientName = jsonPacket.get("destination").getAsString();
+		String destinationClientName = jsonPacket.get("destination").getAsString();
 
-		//Optional<Entry<ClientID, String>> client =
 		nameStorage.entrySet().stream()
 				.filter(entry -> entry.getValue().equals(destinationClientName))
 				.findFirst()
-				.ifPresent(entry -> {
-					byte[] broadCastBuff = createMessage(fromWho, jsonPacket.get("message").getAsString()).getAsString().getBytes();
-					DatagramPacket broadCastPacket = new DatagramPacket(broadCastBuff, broadCastBuff.length);
+				.map(entry -> entry.getKey())
+				.ifPresent(clientID -> {
+					String privateMessage = createMessage(fromWho, jsonPacket.get("message").getAsString()).toString();
+					System.out.println("privateMessage : " + privateMessage);
+
+					byte[] privatePacketBuff = privateMessage.getBytes();
+					DatagramPacket privatePacket = new DatagramPacket(privatePacketBuff, privatePacketBuff.length);
 					try {
-						broadCastPacket.setAddress(InetAddress.getByName(entry.getKey().getHostName()));
-						broadCastPacket.setPort(entry.getKey().getPort());
-						server.send(broadCastPacket);
+						privatePacket.setAddress(InetAddress.getByName(clientID.getHostName()));
+						privatePacket.setPort(clientID.getPort());
+						server.send(privatePacket);
 					} catch (IOException e) {
 						System.err.println("error occurped when sending message");
 					}
@@ -104,7 +115,13 @@ public class Server {
 	 * @return client name
 	 */
 	private static String getName(DatagramPacket packet) {
-		String name = new String(packet.getData());
+		ByteArrayInputStream bis = new ByteArrayInputStream(packet.getData());
+		InputStreamReader isr = new InputStreamReader(bis);
+		JsonReader jsonReader = new JsonReader(isr);
+		jsonReader.setLenient(true);
+		JsonElement jsonPacket = JsonParser.parseReader(jsonReader);
+		String name = jsonPacket.getAsJsonObject().get("message").getAsString();
+
 		System.err.println(name + " enter to chat");
 
 		return name;
@@ -112,7 +129,9 @@ public class Server {
 
 	private static void sendBroadCastMessage(DatagramSocket server, String fromWho, JsonObject jsonPacket) throws IOException {
 		server.setBroadcast(true);
-		byte[] broadCastBuff = createMessage(fromWho, jsonPacket.get("message").getAsString()).getAsString().getBytes();
+		String broadCastMessage = createMessage(fromWho, jsonPacket.get("message").getAsString()).toString();
+		System.out.println("broadCastMessage : " + broadCastMessage);
+		byte[] broadCastBuff = broadCastMessage.getBytes();
 
 		DatagramPacket broadCastPacket = new DatagramPacket(broadCastBuff, broadCastBuff.length);
 		broadCastPacket.setAddress(InetAddress.getByName("255.255.255.255"));
