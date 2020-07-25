@@ -15,6 +15,7 @@ public class Manual {
 			ConnectionManagerJdbcImpl.getInstance();
 
 	public static void main(String[] args) {
+		logger.debug("2.3 manual transaction");
 		//2.3 manual transaction
 
 		try (Connection connection = connectionManager.getConnection()) {

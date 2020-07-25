@@ -10,6 +10,7 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws SQLException {
+        logger.debug("2.1 CRUD parametrized query");
         //2.1 CRUD parametrized query
         ProductDao productDao = new ProductDaoJdbcImpl();
         // Create

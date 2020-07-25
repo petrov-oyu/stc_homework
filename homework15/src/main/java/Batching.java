@@ -17,6 +17,7 @@ public class Batching {
 			ConnectionManagerJdbcImpl.getInstance();
 
 	public static void main(String[] args) {
+		logger.debug("2.2 batching");
 		//2.2 batching
 		Map<Long, String> products = new HashMap<>();
 		products.put(1L, "milk");
